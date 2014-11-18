@@ -16,15 +16,29 @@ def create_results_table():
     x.align["Away"] = "l"
     x.align["Date"] = "l"
     x.align["Goals"] = "l"
-
     return x
 
 
 def create_table_table():
     x = PrettyTable(["Rank", "Club", "Matches", "Wins", "Draws", "Losses", "Goals", "GD", "Points"])
     x.align["Club"] = "l"
-
     return x
+
+
+def create_leagues_table():
+    x = PrettyTable(["Name", "Season", "Shortcut"])
+    x.align["Name"] = "l"
+    return x
+
+
+def create_teams_table():
+    x = PrettyTable(["Name"])
+    x.align["Name"] = "l"
+    return x
+
+
+def current_season():
+    return "2014"
 
 
 def process_matches(matches):

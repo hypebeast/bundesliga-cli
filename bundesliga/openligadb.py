@@ -11,20 +11,26 @@ class OpenLigaDB:
     ERSTE_LIGA = 'bl1'
     ZWEITE_LIGA = 'bl2'
     DRITTE_LIGA = 'bl3'
+    FUSSBALL_SPORT_ID = 1
 
     def __init__(self):
         self.openLigaDBApiUrl = 'http://openligadb-json-api.herokuapp.com/api'
 
-    def getMatchdayResults(self, matchday=0):
+    def getMatchdayResults(self, matchday=0, season="", league=""):
         """
         Returns the results for the given matchday
         """
         if matchday == 0:
             matchday = self.getNextMatchday();
-        saison = self.getSeason()
+
+        if season == "":
+            saison = self.getSeason()
+
+        if league == "":
+            league = self.ERSTE_LIGA
 
         requestUrl = self.openLigaDBApiUrl + '/matchdata_by_group_league_saison'
-        requestUrl += '?group_order_id=%s&league_saison=%s&league_shortcut=%s' % (matchday, saison, self.ERSTE_LIGA)
+        requestUrl += '?group_order_id=%s&league_saison=%s&league_shortcut=%s' % (matchday, season, league)
         data = json.load(urllib2.urlopen(requestUrl))
 
         return data['GetMatchdataByGroupLeagueSaisonResult']
@@ -133,3 +139,17 @@ class OpenLigaDB:
 
     def getMatchesByTeam(self, team):
         pass
+
+    def getAvailLeagues(self):
+        requestUrl = self.openLigaDBApiUrl + '/avail_leagues'
+        data = json.load(urllib2.urlopen(requestUrl))
+
+        leagues = []
+        for league in data['GetAvailLeaguesResult']:
+            league = league['League']
+            if (league['leagueSportID'] == self.FUSSBALL_SPORT_ID
+                and 'test' not in league['leagueName'].lower()
+                and league['leagueID'] != 532):
+                leagues.append(league)
+
+        return leagues
