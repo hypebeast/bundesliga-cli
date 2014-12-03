@@ -19,7 +19,7 @@ LICENSE = open("LICENSE").read()
 setup(
     name='bundesliga-cli',
     version=bundesliga.__version__,
-    description='Command line tool to get information about the Bundesliga',
+    description='Bundesliga results and stats for hackers',
     long_description=(README),
     author='Sebastian Ruml',
     author_email='sebastian@sebastianruml.name',
