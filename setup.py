@@ -19,7 +19,7 @@ LICENSE = open("LICENSE").read()
 setup(
     name='bundesliga-cli',
     version=bundesliga.__version__,
-    description='JiraCards prints agile cards for your physical board from Jira. The issues are read from a Jira Agile Board or individual issues can be provided to create single cards.',
+    description='Command line tool to get information about the Bundesliga',
     long_description=(README),
     author='Sebastian Ruml',
     author_email='sebastian@sebastianruml.name',

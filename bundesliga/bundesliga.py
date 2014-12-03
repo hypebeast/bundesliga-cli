@@ -50,39 +50,47 @@ def process_matches(matches):
         match_result = []
         match = match['Matchdata']
 
-        goalsInfo = ""
         now = datetime.datetime.utcnow()
-        matchDate = parseDateTime(match['matchDateTimeUTC'])
-        date = matchDate.strftime('%H:%M %d.%m.%Y')
-        if matchDate > now:
-            status = "Not started"
-            points = "-:-"
-        else:
-            if match['matchIsFinished'] == True:
-                status = 'Finished'
+        okParsingMatchDate = False
+        try:
+            matchDate = parseDateTime(match['matchDateTimeUTC'])
+            date = matchDate.strftime('%H:%M %d.%m.%Y')
+            okParsingMatchDate = True
+        except:
+            date = "-"
+            status = "-"
+
+        if okParsingMatchDate:
+            if matchDate > now:
+                status = "Not started"
+                points = "-:-"
             else:
-                status = 'Running'
+                if match['matchIsFinished'] == True:
+                    status = 'Finished'
+                else:
+                    status = 'Running'
 
-            if match['goals'] != None and len(match['goals']) > 0:
-                goals = match['goals']
-                for goal in goals:
-                    goal = goal['Goal']
-                    if 'goalGetterName' in goal:
-                        scoreTeam1 = str(goal['goalScoreTeam1'])
-                        scoreTeam2 = str(goal['goalScoreTeam2'])
-                        goalsInfo += scoreTeam1 + ':' + scoreTeam2 + ' ' + goal['goalGetterName'] + ', '
+        goalsInfo = ""
+        if 'goals' in match and match['goals'] != None and len(match['goals']) > 0:
+            goals = match['goals']
+            for goal in goals:
+                goal = goal['Goal']
+                if 'goalGetterName' in goal:
+                    scoreTeam1 = str(goal['goalScoreTeam1'])
+                    scoreTeam2 = str(goal['goalScoreTeam2'])
+                    goalsInfo += scoreTeam1 + ':' + scoreTeam2 + ' ' + goal['goalGetterName'] + ', '
 
-                goalsInfo = goalsInfo[:-2]
+            goalsInfo = goalsInfo[:-2]
 
-                maxLength = 50
-                if len(goalsInfo) > maxLength:
-                    index = string.rfind(goalsInfo[:maxLength-1], ',')
-                    while index < 0:
-                        index = string.rfind(goalsInfo[:maxLength])
-                        maxLength += 1
-                    goalsInfo = goalsInfo[:index] + '\n' + string.strip(goalsInfo[index+1:])
+            maxLength = 50
+            if len(goalsInfo) > maxLength:
+                index = string.rfind(goalsInfo[:maxLength-1], ',')
+                while index < 0:
+                    index = string.rfind(goalsInfo[:maxLength])
+                    maxLength += 1
+                goalsInfo = goalsInfo[:index] + '\n' + string.strip(goalsInfo[index+1:])
 
-            points = str(match['pointsTeam1']) + " : " + str(match['pointsTeam2'])
+        points = str(match['pointsTeam1']) + " : " + str(match['pointsTeam2'])
 
         match_result.append(match['nameTeam1'])
         match_result.append(match['nameTeam2'])

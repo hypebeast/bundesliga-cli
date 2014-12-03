@@ -8,14 +8,16 @@ from bundesliga import *
 
 pass_openligadb = click.make_pass_decorator(OpenLigaDB)
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.pass_context
 def cli(ctx):
     """
-    bundesliga-cli is a command line tool that provides access to Bundesliga
-    information and results.
+    Bundesliga results and stats for hackers.
 
-    Uses API http://openligadb-json-api.heroku.com which is itself a JSON wrapper
+    bundesliga-cli is a CLI tool that provides access to Bundesliga
+    results and stats.
+
+    Uses openligadb-json-api.heroku.com API which is itself a JSON wrapper
     around the OpenligaDB API (http://www.openligadb.de).
     """
     ctx.obj = OpenLigaDB()
@@ -23,12 +25,16 @@ def cli(ctx):
 
 @cli.command()
 @click.option('--matchday', '-d', help='Defines the matchday')
-@click.option('--league', '-l', help='Defines the league (bl1, bl2, bl3)')
+@click.option('--league', '-l', help='Defines the league (e.g. bl1, bl2, bl3)')
 @click.option('--season', '-s', help='Defines the season (e.g. 2014, 2013)')
 @pass_openligadb
 def matchday(openligadb, season, matchday, league):
     """
     Match results for the given matchday.
+
+    Get all available league shortcuts with 'buli leagues'.
+
+    Season format: e.g. 2014 or 2011
     """
     if not matchday:
         matchday = openligadb.getNextMatchday()
@@ -52,16 +58,22 @@ def matchday(openligadb, season, matchday, league):
 @cli.command()
 @click.option('--league', '-l', help='Defines the league')
 @pass_openligadb
-def current(openligadb, league):
+def next(openligadb, league):
     """
-    Shows the match results for the currrent matchday.
+    Shows the match results for the next/current matchday.
+
+    Get all available league shortcuts with 'buli leagues'.
+
+    Season format: e.g. 2014 or 2011
     """
     matchday = openligadb.getNextMatchday()
 
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    matches = openligadb.getMatchdayResults(matchday)
+    season = current_season()
+
+    matches = openligadb.getMatchdayResults(matchday=matchday, season=season, league=league)
     matches = process_matches(matches)
 
     table = create_results_table()
@@ -77,6 +89,10 @@ def current(openligadb, league):
 def last(openligadb, league):
     """
     Shows the match results for the last matchday.
+
+    Get all available league shortcuts with 'buli leagues'.
+
+    Season format: e.g. 2014 or 2011
     """
     matchday = openligadb.getRecentMatchday()
 
@@ -99,9 +115,14 @@ def last(openligadb, league):
 @pass_openligadb
 def table(openligadb, league, season):
     """
-    Shows the league table for the given league.
+    Shows the league table.
 
-    If no league is given the table for the 1. Bundesliga is displayed.
+    By default the league table for the 1. Bundesliga and the currrent
+    season is displayed.
+
+    Get all available league shortcuts with 'buli leagues'.
+
+    Season format: e.g. 2014 or 2011
     """
     if not league:
         league = openligadb.ERSTE_LIGA
@@ -131,15 +152,11 @@ def teams(openligadb, league, season):
     If no season is specified, the current season will be used.
     If no league is specified, the 1. Fussball Bundesliga will be used.
 
-    League format:
+    League format: 'bl1' for 1. Bundesliga, 'bl2' for 2. Bundesliga, etc.
 
-    For example: 'bl1' for 1. Bundesliga, 'bl2' for 2. Bundesliga, etc.
-    Get all availables league shortcuts with 'buli leagues'
+    Get all available league shortcuts with 'buli leagues'.
 
-    Season format:
-
-      - e.g. 2011
-      - Get all available league shortcuts with 'buli leagues'
+    Season format: e.g. 2014 or 2011
     """
     if not league:
         league = "bl1"
@@ -168,7 +185,6 @@ def leagues(openligadb):
     the other options.
     """
     table = create_leagues_table()
-
     leagues = openligadb.getAvailLeagues()
 
     for l in leagues:
@@ -178,7 +194,7 @@ def leagues(openligadb):
     print table
 
 
-cli.add_command(current)
+cli.add_command(next)
 cli.add_command(last)
 cli.add_command(table)
 cli.add_command(teams)
