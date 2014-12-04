@@ -99,7 +99,9 @@ def last(openligadb, league):
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    matches = openligadb.getMatchdayResults(matchday)
+    season = current_season()
+
+    matches = openligadb.getMatchdayResults(matchday=matchday, season=season, league=league)
     matches = process_matches(matches)
 
     table = create_results_table()

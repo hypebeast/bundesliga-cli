@@ -53,7 +53,7 @@ To list the results for the next/current matchday for the 2. Bundesliga:
 
     $ buli next -l bl2
 
-More examples coming soon!
+More examples are coming soon!
 
 ## CLI Options
 
