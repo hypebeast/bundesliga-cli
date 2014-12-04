@@ -30,7 +30,7 @@ clean:
 	find . -name '*~' -exec rm -f {}
 
 lint:
-	flake8 jiracards > violations.flake8.txt
+	flake8 bundesliga > violations.flake8.txt
 
 release: register
 	python setup.py sdist upload
