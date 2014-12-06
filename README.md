@@ -24,7 +24,7 @@ around the OpenligaDB API (http://www.openligadb.de).
 
 ### Using pip
 
-To install JiraCards:
+To install bundesliga-cli:
 
     $ sudo pip install bundesliga-cli
 

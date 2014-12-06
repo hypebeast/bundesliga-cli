@@ -20,8 +20,15 @@ def create_results_table():
 
 
 def create_table_table():
-    x = PrettyTable(["Rank", "Club", "Matches", "Wins", "Draws", "Losses", "Goals", "GD", "Points"])
+    x = PrettyTable(["Rank", "Club", "Matches", "Wins", "Draws", "Losses", "Goals", "GD", "Points"], align="r")
+    x.align["Rank"] = "r"
     x.align["Club"] = "l"
+    x.align["Matches"] = "r"
+    x.align["Wins"] = "r"
+    x.align["Draws"] = "r"
+    x.align["Losses"] = "r"
+    x.align["GD"] = "r"
+    x.align["Points"] = "r"
     return x
 
 
