@@ -2,6 +2,8 @@
 
 import json
 import urllib2
+from datetime import datetime
+from helpers import *
 
 
 class OpenLigaDB:
@@ -106,11 +108,28 @@ class OpenLigaDB:
             previousMatchday = 1
         return str(previousMatchday)
 
-    def getSeason(self):
+    def getSeasons(self, league='bl1'):
         """
         Returns the current saison.
         """
-        return 2014
+        requestUrl = self.openLigaDBApiUrl + '/seasons?league=' + league
+        data = json.load(urllib2.urlopen(requestUrl))
+        return data
+
+    def getCurrentSeason(self, league='bl1'):
+        seasons = self.getSeasons(league)
+        now = datetime.datetime.now()
+
+        for key in seasons:
+            season = seasons[key]
+            start = from_utc(season['start'])
+            end = from_utc(season['end'])
+
+            if now > start and now <= end:
+                return season
+
+        return getYear(now)
+
 
     def getTeams(self, season, league=ERSTE_LIGA):
         """

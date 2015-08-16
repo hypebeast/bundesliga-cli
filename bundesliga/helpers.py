@@ -9,6 +9,15 @@ from prettytable import PrettyTable
 def parseDateTime(time):
     return datetime.datetime.strptime(time, '%a, %d %b %Y %H:%M:%S %Z')
 
+def from_utc(utcTime, fmt="%Y-%m-%dT%H:%M:%S.%fZ"):
+    """
+    Convert UTC ISO-8601 time string to time.struct_time
+    """
+    # change datetime.datetime to time, return time.struct_time type
+    return datetime.datetime.strptime(utcTime, fmt)
+
+def getYear(time):
+    return datetime.datetime.stftime("%Y")
 
 def create_results_table():
     x = PrettyTable(["Home", "Away", "Result", "Goals", "Status", "Date"])
@@ -19,7 +28,7 @@ def create_results_table():
     return x
 
 
-def create_table_table():
+def create_table_table(rows):
     x = PrettyTable(["Rank", "Club", "Matches", "Wins", "Draws", "Losses", "Goals", "GD", "Points"], align="r")
     x.align["Rank"] = "r"
     x.align["Club"] = "l"
@@ -29,6 +38,10 @@ def create_table_table():
     x.align["Losses"] = "r"
     x.align["GD"] = "r"
     x.align["Points"] = "r"
+
+    for row in rows:
+        x.add_row(row)
+
     return x
 
 
@@ -97,7 +110,17 @@ def process_matches(matches):
                     maxLength += 1
                 goalsInfo = goalsInfo[:index] + '\n' + string.strip(goalsInfo[index+1:])
 
-        points = str(match['pointsTeam1']) + " : " + str(match['pointsTeam2'])
+        points = '-:-'
+        matchResults = match['matchResults']
+        if len(matchResults) == 1:
+            result = matchResults[0]['matchResult']
+            points = str(result['pointsTeam1']) + " : " + str(result['pointsTeam2'])
+        elif len(matchResults) >= 2:
+            for entry in matchResults:
+                result = entry['matchResult']
+                if result['resultName'] == 'Endergebnis':
+                    points = str(result['pointsTeam1']) + " : " + str(result['pointsTeam2'])
+                    break
 
         match_result.append(match['nameTeam1'])
         match_result.append(match['nameTeam2'])

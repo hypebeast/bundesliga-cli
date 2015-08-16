@@ -3,7 +3,7 @@
 import click
 
 from openligadb import OpenLigaDB
-from bundesliga import *
+from helpers import *
 
 
 pass_openligadb = click.make_pass_decorator(OpenLigaDB)
@@ -43,7 +43,8 @@ def matchday(openligadb, season, matchday, league):
         league = openligadb.ERSTE_LIGA
 
     if not season:
-        season = current_season()
+        season = openligadb.getCurrentSeason(league)['name']
+
 
     matches = openligadb.getMatchdayResults(matchday, season, league)
     matches = process_matches(matches)
@@ -63,15 +64,13 @@ def next(openligadb, league):
     Shows the match results for the next/current matchday.
 
     Get all available league shortcuts with 'buli leagues'.
-
-    Season format: e.g. 2014 or 2011
     """
     matchday = openligadb.getNextMatchday()
 
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    season = current_season()
+    season = openligadb.getCurrentSeason(league)['name']
 
     matches = openligadb.getMatchdayResults(matchday=matchday, season=season, league=league)
     matches = process_matches(matches)
@@ -91,15 +90,13 @@ def last(openligadb, league):
     Shows the match results for the last matchday.
 
     Get all available league shortcuts with 'buli leagues'.
-
-    Season format: e.g. 2014 or 2011
     """
     matchday = openligadb.getRecentMatchday()
 
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    season = current_season()
+    season = openligadb.getCurrentSeason(league)['name']
 
     matches = openligadb.getMatchdayResults(matchday=matchday, season=season, league=league)
     matches = process_matches(matches)
@@ -130,18 +127,13 @@ def table(openligadb, league, season):
         league = openligadb.ERSTE_LIGA
 
     if not season:
-        season = current_season()
+        season = openligadb.getCurrentSeason(league)['name']
 
-    table = create_table_table()
 
     table_stats = openligadb.getTable(season, league)
     rows = process_table_stats(table_stats)
 
-    for row in rows:
-        table.add_row(row)
-
-    print table
-
+    click.echo(create_table_table(rows))
 
 @cli.command()
 @click.option('--league', '-l', help='Defines the league')
@@ -161,13 +153,12 @@ def teams(openligadb, league, season):
     Season format: e.g. 2014 or 2011
     """
     if not league:
-        league = "bl1"
+        league = openligadb.ERSTE_LIGA
 
     if not season:
-        season = current_season()
+        season = openligadb.getCurrentSeason(league)['name']
 
     table = create_teams_table()
-
     teams = openligadb.getTeams(season, league)
 
     for team in teams:

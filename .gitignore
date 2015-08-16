@@ -3,3 +3,5 @@ venv/
 build/
 dist/
 *.egg-info
+diff
+env/
