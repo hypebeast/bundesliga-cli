@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import string
+# import string
 
 from prettytable import PrettyTable
 
 
 def parseDateTime(time):
-    return datetime.datetime.strptime(time, '%a, %d %b %Y %H:%M:%S %Z')
+    return datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
+
 
 def from_utc(utcTime, fmt="%Y-%m-%dT%H:%M:%S.%fZ"):
     """
     Convert UTC ISO-8601 time string to time.struct_time
     """
-    # change datetime.datetime to time, return time.struct_time type
     return datetime.datetime.strptime(utcTime, fmt)
 
-def getYear(time):
-    return datetime.datetime.stftime("%Y")
 
 def create_results_table():
     x = PrettyTable(["Home", "Away", "Result", "Goals", "Status", "Date"])
@@ -29,7 +27,8 @@ def create_results_table():
 
 
 def create_table_table(rows):
-    x = PrettyTable(["Rank", "Club", "Matches", "Wins", "Draws", "Losses", "Goals", "GD", "Points"], align="r")
+    x = PrettyTable(["Rank", "Club", "Matches", "Wins", "Draws", "Losses",
+                     "Goals", "GD", "Points"], align="r")
     x.align["Rank"] = "r"
     x.align["Club"] = "l"
     x.align["Matches"] = "r"
@@ -68,12 +67,13 @@ def process_matches(matches):
     results = []
     for match in matches:
         match_result = []
-        match = match['Matchdata']
+        # match = match['Matchdata']
 
         now = datetime.datetime.utcnow()
         okParsingMatchDate = False
         try:
-            matchDate = parseDateTime(match['matchDateTimeUTC'])
+            # matchDate = parseDateTime(match['MatchDateTimeUTC'])
+            matchDate = parseDateTime(match['MatchDateTime'])
             date = matchDate.strftime('%H:%M %d.%m.%Y')
             okParsingMatchDate = True
         except:
@@ -85,45 +85,45 @@ def process_matches(matches):
                 status = "Not started"
                 points = "-:-"
             else:
-                if match['matchIsFinished'] == True:
+                if match['MatchIsFinished'] == True:
                     status = 'Finished'
                 else:
                     status = 'Running'
 
         goalsInfo = ""
-        if 'goals' in match and match['goals'] != None and len(match['goals']) > 0:
-            goals = match['goals']
+        if ('Goals' in match and match['Goals'] != None and
+                len(match['Goals']) > 0):
+            goals = match['Goals']
             for goal in goals:
-                goal = goal['Goal']
-                if 'goalGetterName' in goal:
-                    scoreTeam1 = str(goal['goalScoreTeam1'])
-                    scoreTeam2 = str(goal['goalScoreTeam2'])
-                    goalsInfo += scoreTeam1 + ':' + scoreTeam2 + ' ' + goal['goalGetterName'] + ', '
+                # goal = goal['Goal']
+                if 'GoalGetterName' in goal:
+                    scoreTeam1 = str(goal['ScoreTeam1'])
+                    scoreTeam2 = str(goal['ScoreTeam2'])
+                    goalsInfo += (scoreTeam1 + ':' + scoreTeam2 + ' ' +
+                                  goal['GoalGetterName'] + ', ')
 
             goalsInfo = goalsInfo[:-2]
 
             maxLength = 50
             if len(goalsInfo) > maxLength:
-                index = string.rfind(goalsInfo[:maxLength-1], ',')
+                # index = string.rfind(goalsInfo[:maxLength-1], ',')
+                index = goalsInfo.rfind(',', 0, maxLength-1)
                 while index < 0:
-                    index = string.rfind(goalsInfo[:maxLength])
+                    index = goalsInfo.rfind(',', 0, maxLength)
                     maxLength += 1
-                goalsInfo = goalsInfo[:index] + '\n' + string.strip(goalsInfo[index+1:])
+                goalsInfo = (goalsInfo[:index] + '\n' +
+                             goalsInfo[index+2:])
 
         points = '-:-'
-        matchResults = match['matchResults']
-        if len(matchResults) == 1:
-            result = matchResults[0]['matchResult']
-            points = str(result['pointsTeam1']) + " : " + str(result['pointsTeam2'])
-        elif len(matchResults) >= 2:
-            for entry in matchResults:
-                result = entry['matchResult']
-                if result['resultName'] == 'Endergebnis':
-                    points = str(result['pointsTeam1']) + " : " + str(result['pointsTeam2'])
-                    break
+        if match['MatchResults']:
+            result = match['MatchResults'][-1]
+            points = (str(result['PointsTeam1']) + " : " +
+                      str(result['PointsTeam2']))
+        else:
+            points = '0 : 0'
 
-        match_result.append(match['nameTeam1'])
-        match_result.append(match['nameTeam2'])
+        match_result.append(match['Team1']['TeamName'])
+        match_result.append(match['Team2']['TeamName'])
         match_result.append(points)
         match_result.append(goalsInfo)
         match_result.append(status)
