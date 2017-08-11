@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-# import string
-
 from prettytable import PrettyTable
 
 
