@@ -17,7 +17,6 @@ around the OpenligaDB API (http://www.openligadb.de).
 
   * Get results for a specific matchday
   * Get results for different leagues (e.g. 1. Bundesliga, 2. Bundesliga, etc.)
-  * List the league table
   * List all teams
 
 ## Installation
@@ -73,7 +72,6 @@ Options:
 
 Commands:
   last      Shows the match results for the last...
-  leagues   Shows all available soccer leagues.
   matchday  Match results for the given matchday.
   next      Shows the match results for the next/current...
   table     Shows the league table.
