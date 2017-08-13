@@ -67,7 +67,8 @@ def process_matches(matches):
         match_result = []
         # match = match['Matchdata']
 
-        now = datetime.datetime.utcnow()
+        # now = datetime.datetime.utcnow()
+        now = datetime.datetime.now()
         okParsingMatchDate = False
         try:
             # matchDate = parseDateTime(match['MatchDateTimeUTC'])
@@ -81,44 +82,42 @@ def process_matches(matches):
         if okParsingMatchDate:
             if matchDate > now:
                 status = "Not started"
-                points = "-:-"
             else:
                 if match['MatchIsFinished'] == True:
                     status = 'Finished'
                 else:
                     status = 'Running'
 
-        goalsInfo = ""
-        if ('Goals' in match and match['Goals'] != None and
-                len(match['Goals']) > 0):
-            goals = match['Goals']
-            for goal in goals:
-                # goal = goal['Goal']
-                if 'GoalGetterName' in goal:
-                    scoreTeam1 = str(goal['ScoreTeam1'])
-                    scoreTeam2 = str(goal['ScoreTeam2'])
-                    goalsInfo += (scoreTeam1 + ':' + scoreTeam2 + ' ' +
-                                  goal['GoalGetterName'] + ', ')
+        if status == 'Not started':
+            score = '-:-'
+        else:
+            score = '0:0'
 
-            goalsInfo = goalsInfo[:-2]
+        if match['Goals']:
+            goalsInfo = []
+            for goals in match['Goals']:
+                score = (str(goals['ScoreTeam1']) + ':' +
+                         str(goals['ScoreTeam2']))
+                if goals['GoalGetterName']:
+                    goalsInfo.append(score + ' ' + goals['GoalGetterName'])
+                else:
+                    goalsInfo.append(score)
 
+            goalsInfo = ', '.join(goalsInfo)
             maxLength = 50
             if len(goalsInfo) > maxLength:
-                # index = string.rfind(goalsInfo[:maxLength-1], ',')
                 index = goalsInfo.rfind(',', 0, maxLength-1)
                 while index < 0:
                     index = goalsInfo.rfind(',', 0, maxLength)
                     maxLength += 1
                 goalsInfo = (goalsInfo[:index] + '\n' +
                              goalsInfo[index+2:])
-
-        points = '-:-'
-        if match['MatchResults']:
-            result = match['MatchResults'][-1]
-            points = (str(result['PointsTeam1']) + " : " +
-                      str(result['PointsTeam2']))
         else:
-            points = '0 : 0'
+            goalsInfo = ''
+
+        points = parse_points(match, score)
+        if not points:
+            points = '-:-'
 
         match_result.append(match['Team1']['TeamName'])
         match_result.append(match['Team2']['TeamName'])
@@ -130,6 +129,28 @@ def process_matches(matches):
         results.append(match_result)
 
     return results
+
+
+def parse_points(match, score):
+    fulltime = None
+    halftime = None
+    if match['MatchResults']:
+        halftime = ['(' + str(x['PointsTeam1']) +
+                    ':' + str(x['PointsTeam2']) + ')'
+                    for x in match['MatchResults']
+                    if x['ResultName'] == 'Halbzeitergebnis']
+        fulltime = [str(x['PointsTeam1']) + ':' + str(x['PointsTeam2'])
+                    for x in match['MatchResults']
+                    if x['ResultName'] == 'Endergebnis']
+
+    if fulltime:
+        result = fulltime[0] + ' ' + halftime[0]
+    elif halftime:
+        result = score + ' ' + halftime[0]
+    else:
+        result = score
+
+    return result
 
 
 def process_table_stats(stats):
