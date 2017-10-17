@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import click
-
-from openligadb import OpenLigaDB
-from helpers import *
+from .openligadb import OpenLigaDB
+from . import helpers
 
 
 pass_openligadb = click.make_pass_decorator(OpenLigaDB)
+
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -36,24 +36,23 @@ def matchday(openligadb, season, matchday, league):
 
     Season format: e.g. 2014 or 2011
     """
-    if not matchday:
-        matchday = openligadb.getNextMatchday()
-
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    if not season:
-        season = openligadb.getCurrentSeason(league)['name']
+    if not matchday:
+        matchday = openligadb.getNextMatchday(league)
 
+    if not season:
+        season = openligadb.getCurrentSeason(league)  # ['name']
 
     matches = openligadb.getMatchdayResults(matchday, season, league)
-    matches = process_matches(matches)
+    matches = helpers.process_matches(matches)
 
-    table = create_results_table()
+    table = helpers.create_results_table()
     for match in matches:
         table.add_row(match)
 
-    print table
+    print(table)
 
 
 @cli.command()
@@ -65,21 +64,22 @@ def next(openligadb, league):
 
     Get all available league shortcuts with 'buli leagues'.
     """
-    matchday = openligadb.getNextMatchday()
-
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    season = openligadb.getCurrentSeason(league)['name']
+    matchday = openligadb.getNextMatchday(league)
 
-    matches = openligadb.getMatchdayResults(matchday=matchday, season=season, league=league)
-    matches = process_matches(matches)
+    season = openligadb.getCurrentSeason(league)
 
-    table = create_results_table()
+    matches = openligadb.getMatchdayResults(matchday=matchday, season=season,
+                                            league=league)
+    matches = helpers.process_matches(matches)
+
+    table = helpers.create_results_table()
     for match in matches:
         table.add_row(match)
 
-    print table
+    print(table)
 
 
 @cli.command()
@@ -96,16 +96,17 @@ def last(openligadb, league):
     if not league:
         league = openligadb.ERSTE_LIGA
 
-    season = openligadb.getCurrentSeason(league)['name']
+    season = openligadb.getCurrentSeason(league)
 
-    matches = openligadb.getMatchdayResults(matchday=matchday, season=season, league=league)
-    matches = process_matches(matches)
+    matches = openligadb.getMatchdayResults(matchday=matchday, season=season,
+                                            league=league)
+    matches = helpers.process_matches(matches)
 
-    table = create_results_table()
+    table = helpers.create_results_table()
     for match in matches:
         table.add_row(match)
 
-    print table
+    print(table)
 
 
 @cli.command()
@@ -127,13 +128,13 @@ def table(openligadb, league, season):
         league = openligadb.ERSTE_LIGA
 
     if not season:
-        season = openligadb.getCurrentSeason(league)['name']
-
+        season = openligadb.getCurrentSeason(league)  # ['name']
 
     table_stats = openligadb.getTable(season, league)
-    rows = process_table_stats(table_stats)
+    rows = helpers.process_table_stats(table_stats)
 
-    click.echo(create_table_table(rows))
+    click.echo(helpers.create_table_table(rows))
+
 
 @cli.command()
 @click.option('--league', '-l', help='Defines the league')
@@ -156,39 +157,36 @@ def teams(openligadb, league, season):
         league = openligadb.ERSTE_LIGA
 
     if not season:
-        season = openligadb.getCurrentSeason(league)['name']
+        season = openligadb.getCurrentSeason(league)
 
-    table = create_teams_table()
+    table = helpers.create_teams_table()
     teams = openligadb.getTeams(season, league)
 
     for team in teams:
-        row = [team['teamName']]
+        row = [team['TeamName']]
         table.add_row(row)
 
-    print table
+    print(table)
 
 
-@cli.command()
-@pass_openligadb
-def leagues(openligadb):
-    """
-    Shows all available soccer leagues.
+# depreceated
+# @pass_openligadb
+# def leagues(openligadb):
+#     """
+#     Shows all available soccer leagues.
 
-    The 'league shortcut' can be used to specify the league option for
-    the other options.
-    """
-    table = create_leagues_table()
-    leagues = openligadb.getAvailLeagues()
+#     The 'league shortcut' can be used to specify the league option for
+#     the other options.
+#     """
+#     table = helpers.create_leagues_table()
+#     leagues = openligadb.getAvailLeagues()
 
-    for l in leagues:
-        row = [l['leagueName'], l['leagueSaison'], l['leagueShortcut']]
-        table.add_row(row)
+#     for l in leagues:
+#         row = [l['leagueName'], l['leagueSaison'], l['leagueShortcut']]
+#         table.add_row(row)
 
-    print table
+#     print(table)
 
 
-cli.add_command(next)
-cli.add_command(last)
-cli.add_command(table)
-cli.add_command(teams)
-cli.add_command(leagues)
+if __name__ == '__main__':
+        cli(obj={})
